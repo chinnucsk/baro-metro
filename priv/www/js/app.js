@@ -4,7 +4,7 @@
 
 	$.app = {}
 	$.app.init = function() {
-		sockjs = new SockJS('http://' + window.location.hostname + '/a');
+		sockjs = new SockJS('http://' + window.location.hostname + ":" +  window.location.port + '/a');
 		sockjs.onopen = connect;
 		sockjs.onclose = disconnect;
 		sockjs.onmessage = message;
@@ -14,8 +14,10 @@
 		SockJS ops
 	*/
 	function connect() {
+		send("I");
 	}
 	function reconnect() {
+		
 	}
 	function disconnect(e) {
 	}
@@ -27,10 +29,14 @@
 	}
 	function message(m) {
 		var p = $.parseJSON(m.data); 
-		if(p && p.a) {
-			switch(p.a) {
-			}
-		}
+	}
+
+	/*
+		UI
+	*/
+
+	function ui_init() {
+
 	}
 
 	/*

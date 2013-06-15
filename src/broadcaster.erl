@@ -29,8 +29,7 @@ handle_call({remove, Con}, _From, State) ->
 	{reply, ok, State -- [Con]};
 
 handle_call({msg, Msg}, _From, State) -> 
-	JsonMsg = jsonx:encode(Msg),
-	lists:map(fun(C) -> C:send(JsonMsg) end, State),
+	lists:map(fun(C) -> C:send(Msg) end, State),
 	{reply, ok, State};
 
 handle_call(_Msg, _From, State) -> {reply, ok, State}.

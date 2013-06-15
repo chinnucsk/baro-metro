@@ -6,11 +6,8 @@
 -export([history/0]).
 -export([start/0, init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 
--record(sample, { tm = undefine, temp = 0, pres = 0 }).
-
-
 history() -> 
-	gen_server:call(?MODULE, history).
+	jsonx:encode(gen_server:call(?MODULE, history)).
 
 %
 % genserver
@@ -34,7 +31,7 @@ handle_cast(_Msg, State) -> {noreply, State}.
 handle_info(get_sample, State) -> 
 	S = take_sample(),
 	NewState = lists:sublist(State ++ [S], ?QUERY_LEN),
-	broadcaster:send([S]),
+	broadcaster:send(jsonx:encode([S])),
 	next(),
 	{noreply, NewState};
 
@@ -53,10 +50,11 @@ init_device() ->
 	ok.
 
 take_sample() ->
-	Tm = erlang:localtime(),
+	{{Y, Mo, D}, {H, Mi, S}} = erlang:localtime(),
+	Tm = list_to_binary(io_lib:format('~4..0b-~2..0b-~2..0b ~2..0b:~2..0b:~2..0b', [Y, Mo, D, H, Mi, S])),
 	T = random:uniform(60), % {ok, T} = file:read_file(?BMP_TEMP),
 	P = random:uniform(60000), % {ok, P} = file:read_file(?BMP_PRES),
-	#sample{ tm = Tm, temp = T, pres = P}.
+	[{<<"tm">>, Tm}, {<<"t">>, T}, {<<"p">>, P}].
 
 next() ->
 	erlang:send_after(?TIMEOUT, self(), get_sample).

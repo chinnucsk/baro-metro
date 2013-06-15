@@ -4,7 +4,6 @@
 -export([start/2]).
 -export([stop/1]).
 
-
 start(_Type, _Args) ->
 	Events = sockjs_handler:init_state(<<"/a">>, fun events/3, state, [{response_limit, 4096}]),
 	VRoutes = [
@@ -24,7 +23,6 @@ start(_Type, _Args) ->
 stop(_State) ->
 	ok.
 
-
 %
 % SockJS Events
 %
@@ -33,9 +31,7 @@ events(Con, init, _) ->
 	{ok, undefine};
 events(Con, {recv, <<"I">>}, State) -> 
 	ok = broadcaster:add(Con),
-	H = data_source:history(),
-	HJ = jsonx:encode(H),
-	Con:send(HJ),
+	Con:send(data_source:history()),
 	{ok, State};
 events(Con, {recv, Msg}, State) -> 
 	{ok, State};
