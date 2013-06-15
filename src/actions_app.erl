@@ -25,9 +25,21 @@ stop(_State) ->
 	ok.
 
 
+%
+% SockJS Events
+%
+
 events(Con, init, _) -> 
 	{ok, undefine};
+events(Con, {recv, <<"I">>}, State) -> 
+	ok = broadcaster:add(Con),
+	H = data_source:history(),
+	HJ = jsonx:encode(H),
+	Con:send(HJ),
+	{ok, State};
 events(Con, {recv, Msg}, State) -> 
 	{ok, State};
 events(Con, closed, State) -> 
+	broadcaster:remove(Con),
 	{ok, State}.
+	
