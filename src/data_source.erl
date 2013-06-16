@@ -7,7 +7,7 @@
 -export([start/0, init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 
 history() -> 
-	jsonx:encode(gen_server:call(?MODULE, history)).
+	sockjs_json:encode(gen_server:call(?MODULE, history)).
 
 %
 % genserver
@@ -31,7 +31,7 @@ handle_cast(_Msg, State) -> {noreply, State}.
 handle_info(get_sample, State) -> 
 	S = take_sample(),
 	NewState = lists:sublist(State ++ [S], ?QUERY_LEN),
-	broadcaster:send(jsonx:encode([S])),
+	broadcaster:send(sockjs_json:encode([S])),
 	next(),
 	{noreply, NewState};
 
@@ -46,15 +46,19 @@ code_change(_OldVsn, State, _Extra) -> {ok, State}.
 %
 
 init_device() -> 
-	% file:write_file(?I2C_CONROL, ?BMP_INIT),
+	file:write_file(?I2C_CONTROL, ?BMP_INIT),
 	ok.
 
 take_sample() ->
-	{{Y, Mo, D}, {H, Mi, S}} = erlang:localtime(),
-	Tm = list_to_binary(io_lib:format('~4..0b-~2..0b-~2..0b ~2..0b:~2..0b:~2..0b', [Y, Mo, D, H, Mi, S])),
-	T = random:uniform(60), % {ok, T} = file:read_file(?BMP_TEMP),
-	P = random:uniform(60000), % {ok, P} = file:read_file(?BMP_PRES),
-	[{<<"tm">>, Tm}, {<<"t">>, T}, {<<"p">>, P}].
+	{{_Y, _Mo, _D}, {_H, Mi, S}} = erlang:localtime(),
+	Tm = list_to_binary(io_lib:format('~2..0b:~2..0b', [Mi, S])),
+	% Tv = random:uniform(40), 
+	{ok, T} = file:read_file(?BMP_TEMP),
+	Tv = list_to_integer(binary_to_list(T)) / 10,
+	% Pv = random:uniform(1100), 
+	{ok, P} = file:read_file(?BMP_PRES),
+	Pv = list_to_integer(binary_to_list(P)) / 100,
+	[{<<"tm">>, Tm}, {<<"t">>, Tv}, {<<"p">>, Pv}].
 
 next() ->
 	erlang:send_after(?TIMEOUT, self(), get_sample).

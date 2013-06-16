@@ -1,7 +1,13 @@
 (function($) {
 	var d = new Date();
 	var sockjs = null;
+	var tg = null;
+	var pg = null;
+	var tgr = null;
+	var pgr = null;
 
+	var p = [];
+	
 	$.app = {}
 	$.app.init = function() {
 		sockjs = new SockJS('http://' + window.location.hostname + ":" +  window.location.port + '/a');
@@ -14,12 +20,14 @@
 		SockJS ops
 	*/
 	function connect() {
+		ui_init();
 		send("I");
 	}
 	function reconnect() {
-		
+		setTimeout(function() { $.app.init(); }, 3000);
 	}
 	function disconnect(e) {
+		reconnect();
 	}
 	function send(val) {
 		if(sockjs && sockjs.readyState == SockJS.OPEN) 
@@ -28,34 +36,109 @@
 			setTimeout(function() { send(val); }, 1000);
 	}
 	function message(m) {
-		var p = $.parseJSON(m.data); 
+		a = $.parseJSON(m.data); 
+		if(a) {
+			if(a.length > 1) {
+				p = a;
+				while(p.length > 50) p.shift();
+				ui_reset();
+			} else {
+				p.push(a[0]);
+				while(p.length > 50) p.shift();
+				ui_update(a[0]);
+			}
+		}
 	}
 
 	/*
 		UI
 	*/
-
 	function ui_init() {
-
+		tg = tgauge();
+		pg = pgauge();
+		tgr = tgraph();
+		pgr = pgraph();
 	}
 
-	/*
-		Templates
-	*/
-	$.nano = function(template, data) {
-    	return template.replace(/\{([\w\.]*)\}/g, function (str, key) {
-      			var keys = key.split("."), value = data[keys.shift()];
-     			$.each(keys, function () { value = value[this]; });
-      			return (value === null || value === undefined) ? "" : value;
-    		});
-  	};
+	function ui_reset() {
+		tgr.option('dataSource', p);
+		pgr.option('dataSource', p);
+	}
 
-  	$.nano.strip = function(s) { 
-    	s = s.replace(/&/gi, "&amp;");
-    	s = s.replace(/\"/gi, "&quot;");
-    	s = s.replace(/</gi, "&lt;");
-    	s = s.replace(/>/gi, "&gt;");
-		return s; 
+	function ui_update(s) {
+		tg.rangeBarValue(0, s.t);
+		pg.markerValue(0, s.p);
+		ui_reset();
+	}
+
+	function tgauge() {
+		return $('#tgauge').dxLinearGauge({
+				title: 'Temperature',
+				geometry: { orientation: 'vertical' },
+				scale: {
+					startValue: -40,
+					endValue: 40,
+					majorTick: { tickInterval: 40 }
+				},
+				rangeContainer: {
+					backgroundColor: 'none',
+					ranges: [
+						{ startValue: -40, endValue: 0, color: '#679ec5' },
+						{ startValue: 0, endValue: 40 }
+					]
+				},
+				rangeBars: [{ value: 10 , text: { indent: 20 } }]
+			}).dxLinearGauge('instance');		
+	}
+
+	function pgauge() {
+		return $('#pgauge').dxLinearGauge({
+				title: 'Pressure',
+				geometry: { orientation: 'vertical' },
+				scale: {
+					startValue: 800,
+					endValue: 1200,
+					majorTick: {
+						showCalculatedTicks: false,
+						customTickValues: [0, 1000, 1020, 1100]
+					}
+				},
+				rangeContainer: {
+					backgroundColor: 'none',
+					ranges: [
+						{ startValue: 0, endValue: 1000, color: '#679ec5' },
+						{ startValue: 1000, endValue: 1020, color: '#a6c567' },
+						{ startValue: 1020, endValue: 1100, color: '#e18e92' }
+					]
+				},
+				markers: [{value: 900}]
+			}).dxLinearGauge('instance');
+	}
+
+	function tgraph() {
+		return $("#tgraph").dxChart({
+				commonSeriesSettings: {
+					type: 'area',
+			        argumentField: 'tm'
+			    },
+			    series: [
+			    	{ name: "t, °C", valueField: 't', color: '#679ec5' }
+			    ],
+			    title: 'Temperature'
+		}).dxChart('instance');
+	}
+
+	function pgraph() {
+		return $("#pgraph").dxChart({
+				commonSeriesSettings: {
+					type: 'area',
+			        argumentField: 'tm'
+			    },
+			    series: [
+			    	{ name: "P, mBar", valueField: 'p', color: '#a6c567' }
+			    ],
+			    title: 'Pressure'
+		}).dxChart('instance');
 	}
 
 

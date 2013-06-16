@@ -1,2 +1,5 @@
-body { font-family: 'PT Sans Narrow'; font-size: 12pt; background: #ccc; }
+body { font-family: 'PT Sans Narrow'; font-size: 12pt; background: #fff; }
 h1 { font-family: 'PT Sans Narrow'; font-size: 40px; color: #333; }
+
+.lin { height: 170px; margin-bottom: 20px; }
+.col { height: 360px; }

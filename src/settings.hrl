@@ -4,5 +4,5 @@
 -define(BMP_TEMP, "/sys/bus/i2c/devices/1-0077/temp0_input").
 -define(BMP_PRES, "/sys/bus/i2c/devices/1-0077/pressure0_input").
 
--define(QUERY_LEN, 180).
--define(TIMEOUT, 3000).
+-define(QUERY_LEN, 50).
+-define(TIMEOUT, 2000).
