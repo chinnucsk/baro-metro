@@ -100,15 +100,15 @@
 					endValue: 1200,
 					majorTick: {
 						showCalculatedTicks: false,
-						customTickValues: [0, 1000, 1020, 1100]
+						customTickValues: [800, 900, 1020, 1200]
 					}
 				},
 				rangeContainer: {
 					backgroundColor: 'none',
 					ranges: [
-						{ startValue: 0, endValue: 1000, color: '#679ec5' },
-						{ startValue: 1000, endValue: 1020, color: '#a6c567' },
-						{ startValue: 1020, endValue: 1100, color: '#e18e92' }
+						{ startValue: 800, endValue: 1000, color: '#679ec5' },
+						{ startValue: 900, endValue: 1020, color: '#a6c567' },
+						{ startValue: 1020, endValue: 1200, color: '#e18e92' }
 					]
 				},
 				markers: [{value: 900}]
