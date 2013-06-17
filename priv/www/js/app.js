@@ -124,7 +124,8 @@
 			    series: [
 			    	{ name: "t, °C", valueField: 't', color: '#679ec5' }
 			    ],
-			    title: 'Temperature'
+			    title: 'Temperature',
+				animation: { enabled: false }
 		}).dxChart('instance');
 	}
 
@@ -137,7 +138,8 @@
 			    series: [
 			    	{ name: "P, mBar", valueField: 'p', color: '#a6c567' }
 			    ],
-			    title: 'Pressure'
+			    title: 'Pressure',
+			    animation: { enabled: false }	
 		}).dxChart('instance');
 	}
 
